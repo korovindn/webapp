@@ -1,0 +1,32 @@
+name: Deploy
+
+on:
+  push:
+    branches: ['master']
+  pull_request:
+    branches: ['master']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+
+    steps:
+      - uses: https://github.com/actions/checkout@v4
+
+      - name: install node
+        uses: https://github.com/actions/setup-node@v4
+        with:
+          node-version: 16
+      - run: npm i
+      - run: npm run build
+
+      - name: Publish
+        uses: https://github.com/nogsantos/scp-deploy@master
+        with:
+          src: ./build/*
+          host: ${{ secrets.SSH_HOST }}
+          remote: /var/www/html/actions_test
+          port: 22
+          user: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE }}
